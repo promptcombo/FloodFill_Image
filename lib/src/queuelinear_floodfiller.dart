@@ -29,7 +29,7 @@ class QueueLinearFloodFiller {
 
   void resize(Size size) {
     if (_cachedWidth != size.width.toInt() || _cachedHeight != size.height.toInt()) {
-      image = img.copyResize(image!, width: size.width.toInt(), height: size.height.toInt());
+      //image = img.copyResize(image!, width: size.width.toInt(), height: size.height.toInt());
       _width = image!.width;
       _height = image!.height;
       _cachedWidth = _width;

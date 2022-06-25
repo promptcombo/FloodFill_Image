@@ -91,8 +91,11 @@ class FloodFillPainter extends CustomPainter {
   }
 
   void fill(Offset position) async {
-    int pX = position.dx.toInt();
-    int pY = position.dy.toInt();
+    if (_width == null || _height == null) return;
+    double percentX = position.dx / _width!;
+    double percentY = position.dy / _height!;
+    int pX = (image.width * percentX).toInt();
+    int pY = (image.height * percentY).toInt();
 
     if (_filler == null) return;
 

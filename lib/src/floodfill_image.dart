@@ -93,10 +93,10 @@ class _FloodFillImageState extends State<FloodFillImage> {
 
   void _resizeImage() {
     _imageProvider = widget.imageProvider;
-    if (widget.width != null)
+    /*if (widget.width != null)
       _imageProvider = ResizeImage(widget.imageProvider, width: widget.width);
     if (widget.height != null)
-      _imageProvider = ResizeImage(widget.imageProvider, height: widget.height);
+      _imageProvider = ResizeImage(widget.imageProvider, height: widget.height);*/
   }
 
   void _getImage() {
