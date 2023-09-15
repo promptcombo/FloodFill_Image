@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'dart:ui' as ui;
 import 'floodfill_painter.dart';
+import 'package:image/image.dart' as img;
 
 class FloodFillImage extends StatefulWidget {
   /// The image to display via [ImageProvider].
@@ -41,7 +42,7 @@ class FloodFillImage extends StatefulWidget {
 
   /// Callback function that returns the touch position and an [Image] from *dart:ui* when flood fill starts.
   /// <br>**Note:** Touch coordinate is relative to the image dimension.
-  final Function(Offset position,ui.Image image)? onFloodFillStart;
+  final Function(Offset position, ui.Image image)? onFloodFillStart;
 
   /// Callback function that returns an [Image] from *dart:ui* when flood fill ended.
   final Function(ui.Image image)? onFloodFillEnd;
@@ -101,7 +102,8 @@ class _FloodFillImageState extends State<FloodFillImage> {
 
   void _getImage() {
     final ImageStream? oldImageStream = _imageStream;
-    _imageStream = _imageProvider?.resolve(createLocalImageConfiguration(context));
+    _imageStream =
+        _imageProvider?.resolve(createLocalImageConfiguration(context));
     if (_imageStream?.key != oldImageStream?.key) {
       final ImageStreamListener listener = ImageStreamListener(_updateImage);
       oldImageStream?.removeListener(listener);
@@ -116,7 +118,8 @@ class _FloodFillImageState extends State<FloodFillImage> {
     _repainter = ValueNotifier("");
     _painter = FloodFillPainter(
         image: _imageInfo!.image,
-        fillColor: widget.fillColor,
+        fillColor: img.ColorRgba8(widget.fillColor.red, widget.fillColor.green,
+            widget.fillColor.blue, widget.fillColor.alpha),
         notifier: _repainter,
         onFloodFillStart: widget.onFloodFillStart,
         onFloodFillEnd: widget.onFloodFillEnd,
@@ -136,7 +139,12 @@ class _FloodFillImageState extends State<FloodFillImage> {
   @override
   Widget build(BuildContext context) {
     if (_painter != null) {
-      _painter?.setFillColor(widget.fillColor); //incase we want to update fillColor
+      final fillColor = img.ColorRgba8(
+          widget.fillColor.red,
+          widget.fillColor.green,
+          widget.fillColor.blue,
+          widget.fillColor.alpha);
+      _painter?.setFillColor(fillColor); //incase we want to update fillColor
       _painter?.setAvoidColor(widget.avoidColor!);
       _painter?.setTolerance(widget.tolerance);
       _painter?.setIsFillActive(widget.isFillActive);
@@ -164,7 +172,8 @@ class _FloodFillImageState extends State<FloodFillImage> {
 
             _painter!.setSize(Size(w, h));
             return (widget.alignment == null)
-                ? RepaintBoundary(child: CustomPaint(painter: _painter, size: Size(w, h)))
+                ? RepaintBoundary(
+                    child: CustomPaint(painter: _painter, size: Size(w, h)))
                 : Align(
                     alignment: widget.alignment!,
                     child: CustomPaint(painter: _painter, size: Size(w, h)));

@@ -16,8 +16,8 @@ class FloodFillPainter extends CustomPainter {
 
   ValueNotifier<String>? notifier;
   ui.Image image;
-  Color fillColor;
-  Function(Offset,ui.Image)? onFloodFillStart;
+  img.Color fillColor;
+  Function(Offset, ui.Image)? onFloodFillStart;
   Function(ui.Image)? onFloodFillEnd;
   Function? onInitialize;
   Function? onRepainted;
@@ -34,10 +34,11 @@ class FloodFillPainter extends CustomPainter {
   }
 
   void _initFloodFiller() async {
-    ByteData byteData = (await image.toByteData(format: ui.ImageByteFormat.png))!;
+    ByteData byteData =
+        (await image.toByteData(format: ui.ImageByteFormat.png))!;
     var bytes = byteData.buffer.asUint8List();
     img.Image decoded = img.decodeImage(bytes)!;
-    _filler = QueueLinearFloodFiller(decoded, img.getColor(fillColor.red, fillColor.green, fillColor.blue, fillColor.alpha));
+    _filler = QueueLinearFloodFiller(decoded, fillColor);
     onInitialize!();
   }
 
@@ -47,8 +48,8 @@ class FloodFillPainter extends CustomPainter {
     _filler?.resize(size);
   }
 
-  void setFillColor(Color color) {
-    _filler?.setFillColor(img.getColor(color.red, color.green, color.blue, color.alpha));
+  void setFillColor(img.Color color) {
+    _filler?.setFillColor(color);
   }
 
   void setIsFillActive(bool isActive) {
@@ -63,17 +64,17 @@ class FloodFillPainter extends CustomPainter {
     if (tolerance != null) _filler?.setTolerance(tolerance);
   }
 
-  bool _checkAvoidColor(int touchColor) {
+  bool _checkAvoidColor(img.Color touchColor) {
     if (_avoidColor == null) return false;
 
     return _avoidColor!.any((element) => _isAvoidColor(element, touchColor));
   }
 
-  bool _isAvoidColor(Color avoidColor, int touchColor) {
-    int touchR = img.getRed(touchColor);
-    int touchG = img.getGreen(touchColor);
-    int touchB = img.getBlue(touchColor);
-    int touchA = img.getAlpha(touchColor);
+  bool _isAvoidColor(Color avoidColor, img.Color touchColor) {
+    final touchR = touchColor.r;
+    final touchG = touchColor.g;
+    final touchB = touchColor.b;
+    final touchA = touchColor.a;
 
     int red = avoidColor.red;
     int green = avoidColor.green;
@@ -98,9 +99,9 @@ class FloodFillPainter extends CustomPainter {
 
     if (pX < 0 || pY < 0) return;
 
-    int touchColor = _filler!.image!.getPixelSafe(pX, pY);
+    final touchColor = _filler!.image!.getPixelSafe(pX, pY);
     if (_checkAvoidColor(touchColor)) return;
-    if (onFloodFillStart != null) onFloodFillStart!(position,image);
+    if (onFloodFillStart != null) onFloodFillStart!(position, image);
 
     _filler?.setTargetColor(touchColor);
     await _filler!.floodFill(pX, pY);
@@ -137,11 +138,15 @@ class FloodFillPainter extends CustomPainter {
         BoxFit.fill);
   }
 
-  void paintImage(ui.Image image, Rect outputRect, Canvas canvas, Paint paint, BoxFit fit) {
-    final Size imageSize = Size(image.width.toDouble(), image.height.toDouble());
-    final FittedSizes sizes  = applyBoxFit(fit, imageSize, outputRect.size);
-    final Rect inputSubrect  = Alignment.center.inscribe(sizes.source, Offset.zero & imageSize);
-    final Rect outputSubrect = Alignment.center.inscribe(sizes.destination, outputRect);
+  void paintImage(
+      ui.Image image, Rect outputRect, Canvas canvas, Paint paint, BoxFit fit) {
+    final Size imageSize =
+        Size(image.width.toDouble(), image.height.toDouble());
+    final FittedSizes sizes = applyBoxFit(fit, imageSize, outputRect.size);
+    final Rect inputSubrect =
+        Alignment.center.inscribe(sizes.source, Offset.zero & imageSize);
+    final Rect outputSubrect =
+        Alignment.center.inscribe(sizes.destination, outputRect);
     canvas.drawImageRect(image, inputSubrect, outputSubrect, paint);
   }
 
@@ -150,5 +155,3 @@ class FloodFillPainter extends CustomPainter {
     return true;
   }
 }
-
-

@@ -6,6 +6,7 @@
 import 'dart:async';
 import 'dart:collection';
 import 'dart:ui';
+import 'package:flutter/material.dart';
 import 'package:image/image.dart' as img;
 
 class QueueLinearFloodFiller {
@@ -14,13 +15,13 @@ class QueueLinearFloodFiller {
   int _height = 0;
   int _cachedWidth = -1;
   int _cachedHeight = -1;
-  int _fillColor = 0;
+  late img.Color _fillColor;
   int _tolerance = 8;
-  List<int> _startColor = [0, 0, 0, 0];
+  List<num> _startColor = [0, 0, 0, 0];
   List<bool>? _pixelsChecked;
   Queue<_FloodFillRange>? _ranges;
 
-  QueueLinearFloodFiller(img.Image imgVal, int newColor) {
+  QueueLinearFloodFiller(img.Image imgVal, img.Color newColor) {
     image = imgVal;
     _width = image!.width;
     _height = image!.height;
@@ -28,8 +29,10 @@ class QueueLinearFloodFiller {
   }
 
   void resize(Size size) {
-    if (_cachedWidth != size.width.toInt() || _cachedHeight != size.height.toInt()) {
-      image = img.copyResize(image!, width: size.width.toInt(), height: size.height.toInt());
+    if (_cachedWidth != size.width.toInt() ||
+        _cachedHeight != size.height.toInt()) {
+      image = img.copyResize(image!,
+          width: size.width.toInt(), height: size.height.toInt());
       _width = image!.width;
       _height = image!.height;
       _cachedWidth = _width;
@@ -37,22 +40,22 @@ class QueueLinearFloodFiller {
     }
   }
 
-  void setTargetColor(int targetColor) {
-    _startColor[0] = img.getRed(targetColor);
-    _startColor[1] = img.getGreen(targetColor);
-    _startColor[2] = img.getBlue(targetColor);
-    _startColor[3] = img.getAlpha(targetColor);
+  void setTargetColor(img.Color targetColor) {
+    _startColor[0] = targetColor.r;
+    _startColor[1] = targetColor.g;
+    _startColor[2] = targetColor.b;
+    _startColor[3] = targetColor.a;
   }
 
   void setTolerance(int value) {
     _tolerance = value.clamp(0, 100);
   }
 
-  int getFillColor() {
+  img.Color? getFillColor() {
     return _fillColor;
   }
 
-  void setFillColor(int value) {
+  void setFillColor(img.Color value) {
     _fillColor = value;
   }
 
@@ -71,11 +74,10 @@ class QueueLinearFloodFiller {
 
     if (_startColor[0] == 0) {
       // ***Get starting color.
-      int startPixel = image!.getPixelSafe(x, y);
-
-      _startColor[0] = img.getRed(startPixel);
-      _startColor[1] = img.getGreen(startPixel);
-      _startColor[2] = img.getBlue(startPixel);
+      final startPixel = image!.getPixelSafe(x, y);
+      _startColor[0] = startPixel.r;
+      _startColor[1] = startPixel.g;
+      _startColor[2] = startPixel.b;
     }
 
     // ***Do first call to floodfill.
@@ -133,7 +135,7 @@ class QueueLinearFloodFiller {
     while (true) {
       // **fill with the color
       //pixels[pxIdx] = _fillColor;
-      image?.setPixelSafe(lFillLoc, y, _fillColor);
+      image?.setPixel(lFillLoc, y, _fillColor);
 
       // **indicate that this pixel has already been checked and filled
       _pixelsChecked![pxIdx] = true;
@@ -158,7 +160,7 @@ class QueueLinearFloodFiller {
 
     while (true) {
       // **fill with the color
-      image?.setPixelSafe(rFillLoc, y, _fillColor);
+      image?.setPixel(rFillLoc, y, _fillColor);
 
       // **indicate that this pixel has already been checked and filled
       _pixelsChecked![pxIdx] = true;
@@ -183,11 +185,11 @@ class QueueLinearFloodFiller {
 
   // Sees if a pixel is within the color tolerance range.
   bool _checkPixel(int x, int y) {
-    int pixelColor = image!.getPixelSafe(x, y);
-    int red = img.getRed(pixelColor);
-    int green = img.getGreen(pixelColor);
-    int blue = img.getBlue(pixelColor);
-    int alpha = img.getAlpha(pixelColor);
+    final pixelColor = image!.getPixelSafe(x, y);
+    final red = pixelColor.r;
+    final green = pixelColor.g;
+    final blue = pixelColor.b;
+    final alpha = pixelColor.a;
 
     return (red >= (_startColor[0] - _tolerance) &&
         red <= (_startColor[0] + _tolerance) &&
@@ -204,7 +206,7 @@ class QueueLinearFloodFiller {
 class _FloodFillRange {
   int startX = -1;
   int endX = -1;
-  int y = - 1;
+  int y = -1;
 
   _FloodFillRange(int startX, int endX, int yPos) {
     this.startX = startX;
